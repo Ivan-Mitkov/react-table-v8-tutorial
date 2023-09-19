@@ -34,7 +34,7 @@ export const COLUMNS = [
     header: 'Date of Birth',
     footer: 'Date of Birth',
     accessorKey: 'date_of_birth',
-    Cell: ({ value }) => {
+    cell: ({ value }) => {
       return format(new Date(value), 'dd/MM/yyyy');
     },
     // Filter: ColumnFilter,
@@ -68,17 +68,43 @@ export const GROUPED_COLUMNS = [
   },
   {
     header: 'Name',
-    footer: 'Name',
     columns: [
-      { header: 'First Name', footer: 'First Name', accessorKey: 'first_name' },
-      { header: 'Last Name', footer: 'Last Name', accessorKey: 'last_name' },
+      {
+        id: 'first_name',
+        accessorFn: (row) => row['first_name'],
+
+        // cell: (info) => info.getValue(),
+        header: () => <span>First Name</span>,
+        footer: () => <span>First Name</span>,
+
+        /**
+         * override the value used for row grouping
+         * (otherwise, defaults to the value derived from accessorKey / accessorFn)
+         */
+        getGroupingValue: (row) => {
+          return `${row['first_name']} \\\\ ${row['last_name']}`;
+        },
+      },
+      {
+        accessorFn: (row) => row['last_name'],
+        id: 'last_Name',
+        header: () => <span>Last Name</span>,
+        footer: () => <span>Last Name</span>,
+        // cell: (info) => info.getValue(),
+      },
     ],
   },
   {
     header: 'Info',
-    footer: 'Info',
     columns: [
-      { header: 'Date of Birth', footer: 'Date of Birth', accessorKey: 'date_of_birth' },
+      {
+        id: 'date_of_birth',
+        header: 'Date of Birth',
+        footer: 'Date of Birth',
+        accessorFn: (row) => {
+          return format(new Date(row['date_of_birth']), 'dd/MM/yyyy');
+        },
+      },
       { header: 'Country', footer: 'Country', accessorKey: 'country' },
       { header: 'Phone Number', footer: 'Phone Number', accessorKey: 'phone' },
     ],

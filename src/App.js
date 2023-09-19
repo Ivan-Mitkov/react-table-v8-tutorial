@@ -1,9 +1,9 @@
-import BasicTable from './components/BasicTable';
+import GroupingTables from './components/GroupingTables';
 
 function App() {
   return (
     <div>
-      <BasicTable />
+      <GroupingTables />
     </div>
   );
 }

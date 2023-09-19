@@ -36,7 +36,7 @@ const BasicTable = () => {
       </tbody>
       <tfoot>
         {getFooterGroups().map((footerGroup) => (
-          <tr>
+          <tr key={footerGroup.id}>
             {footerGroup.headers.map((column) => (
               <td key={column.id}>
                 {flexRender(column.column.columnDef.footer, column.getContext())}
