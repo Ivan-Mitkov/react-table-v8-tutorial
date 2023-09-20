@@ -33,9 +33,8 @@ export const COLUMNS = [
   {
     header: 'Date of Birth',
     footer: 'Date of Birth',
-    accessorKey: 'date_of_birth',
-    cell: ({ value }) => {
-      return format(new Date(value), 'dd/MM/yyyy');
+    accessorFn: (row) => {
+      return format(new Date(row['date_of_birth']), 'dd/MM/yyyy');
     },
     // Filter: ColumnFilter,
   },

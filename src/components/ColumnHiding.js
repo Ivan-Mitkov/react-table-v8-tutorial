@@ -1,70 +1,95 @@
 import React, { useMemo } from 'react';
-import { useTable } from 'react-table';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import MOCK_DATA from './MOCK_DATA.json';
 import { COLUMNS } from './columns';
-import Checkbox from './Checkbox';
 import './table.css';
 
 const ColumnHiding = () => {
   const columns = useMemo(() => COLUMNS, []);
   const data = useMemo(() => MOCK_DATA, []);
+  const [columnVisibility, setColumnVisibility] = React.useState({});
 
-  const tableInstance = useTable({ columns, data });
+  const tableInstance = useReactTable({
+    columns,
+    data,
+    state: {
+      columnVisibility,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
   const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    footerGroups,
-    rows,
-    prepareRow,
-    allColumns,
-    getToggleHideAllColumnsProps,
+    getIsAllColumnsVisible,
+    getToggleAllColumnsVisibilityHandler,
+    getAllLeafColumns,
+    getHeaderGroups,
   } = tableInstance;
 
   return (
     <>
       <div>
         <div>
-          <Checkbox {...getToggleHideAllColumnsProps()} />
-          Toggle all
-        </div>
-        {allColumns.map((column) => (
-          <div id={column.id}>
+          <div>
             <label>
-              <input type="checkbox" {...column.getToggleHiddenProps()} />
-              {column.Header}
+              <input
+                {...{
+                  type: 'checkbox',
+                  checked: getIsAllColumnsVisible(),
+                  onChange: getToggleAllColumnsVisibilityHandler(),
+                }}
+              />{' '}
+              Toggle All
             </label>
           </div>
-        ))}
+          {getAllLeafColumns().map((column) => {
+            return (
+              <div key={column.id} className="px-1">
+                <label>
+                  <input
+                    {...{
+                      type: 'checkbox',
+                      checked: column.getIsVisible(),
+                      onChange: column.getToggleVisibilityHandler(),
+                    }}
+                  />{' '}
+                  {column.id}
+                </label>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <table {...getTableProps()}>
+      <table>
         <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
+          {getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id} colSpan={headerGroup.colSpan}>
               {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                <th key={column.id}>
+                  {flexRender(column.column.columnDef.header, column.getContext())}
+                </th>
               ))}
             </tr>
           ))}
         </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
-                })}
-              </tr>
-            );
-          })}
+        <tbody>
+          {tableInstance.getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+              ))}
+            </tr>
+          ))}
         </tbody>
         <tfoot>
-          {footerGroups.map((footerGroup) => (
-            <tr {...footerGroup.getFooterGroupProps()}>
-              {footerGroup.headers.map((column) => (
-                <td {...column.getFooterProps()}>{column.render('Footer')}</td>
+          {tableInstance.getFooterGroups().map((footerGroup) => (
+            <tr key={footerGroup.id}>
+              {footerGroup.headers.map((header) => (
+                <th key={header.id} colSpan={header.colSpan}>
+                  {header.isPlaceholder
+                    ? null
+                    : flexRender(header.column.columnDef.footer, header.getContext())}
+                </th>
               ))}
             </tr>
           ))}

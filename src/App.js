@@ -1,9 +1,9 @@
-import GroupingTables from './components/GroupingTables';
+import ColumnHiding from './components/ColumnHiding';
 
 function App() {
   return (
     <div>
-      <GroupingTables />
+      <ColumnHiding />
     </div>
   );
 }
