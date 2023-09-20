@@ -1,24 +1,15 @@
 import React, { useMemo } from 'react';
 import {
-  Column,
-  Table,
   useReactTable,
-  ColumnFiltersState,
   getCoreRowModel,
   getFilteredRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFacetedMinMaxValues,
+  // getFacetedRowModel,
+  // getFacetedUniqueValues,
+  // getFacetedMinMaxValues,
   getPaginationRowModel,
-  sortingFns,
-  getSortedRowModel,
-  FilterFn,
-  SortingFn,
-  ColumnDef,
   flexRender,
-  FilterFns,
 } from '@tanstack/react-table';
-import { RankingInfo, rankItem, compareItems } from '@tanstack/match-sorter-utils';
+import { rankItem } from '@tanstack/match-sorter-utils';
 
 import MOCK_DATA from './MOCK_DATA.json';
 import { COLUMNS } from './columns';
@@ -37,21 +28,6 @@ const fuzzyFilter = (row, columnId, value, addMeta) => {
 
   // Return if the item should be filtered in/out
   return itemRank.passed;
-};
-
-const fuzzySort = (rowA, rowB, columnId) => {
-  let dir = 0;
-
-  // Only sort by rank if the column has ranking information
-  if (rowA.columnFiltersMeta[columnId]) {
-    dir = compareItems(
-      rowA.columnFiltersMeta[columnId]?.itemRank,
-      rowB.columnFiltersMeta[columnId]?.itemRank,
-    );
-  }
-
-  // Provide an alphanumeric fallback for when the item ranks are equal
-  return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
 };
 
 const FilteringTable = () => {
@@ -76,11 +52,10 @@ const FilteringTable = () => {
     globalFilterFn: fuzzyFilter,
     getCoreRowModel: getCoreRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
-    getFacetedRowModel: getFacetedRowModel(),
-    getFacetedUniqueValues: getFacetedUniqueValues(),
-    getFacetedMinMaxValues: getFacetedMinMaxValues(),
+    // getFacetedRowModel: getFacetedRowModel(),
+    // getFacetedUniqueValues: getFacetedUniqueValues(),
+    // getFacetedMinMaxValues: getFacetedMinMaxValues(),
   });
 
   const { getHeaderGroups, getFooterGroups, getRowModel } = tableInstance;
@@ -103,18 +78,6 @@ const FilteringTable = () => {
                 <th key={column.id}>
                   {column.isPlaceholder ? null : (
                     <>
-                      <div
-                        {...{
-                          className: column.column.getCanSort() ? 'cursor-pointer select-none' : '',
-                          onClick: column.column.getToggleSortingHandler(),
-                        }}
-                      >
-                        {flexRender(column.column.columnDef.header, column.getContext())}
-                        {{
-                          asc: ' 🔼',
-                          desc: ' 🔽',
-                        }[column.column.getIsSorted()] ?? null}
-                      </div>
                       {column.column.getCanFilter() ? (
                         <div>
                           <Filter column={column.column} table={tableInstance} />
@@ -210,7 +173,7 @@ const FilteringTable = () => {
         </select>
       </div>
       <div>{tableInstance.getPrePaginationRowModel().rows.length} Rows</div>
-      <pre>{JSON.stringify(tableInstance.getState(), null, 2)}</pre>
+      <pre>{JSON.stringify(tableInstance.getFilteredRowModel(), null, 2)}</pre>
     </div>
   );
 };
