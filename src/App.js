@@ -1,9 +1,9 @@
-import RowSelection from './components/RowSelection';
+import SortingTable from './components/SortingTable';
 
 function App() {
   return (
     <div>
-      <RowSelection />
+      <SortingTable />
     </div>
   );
 }

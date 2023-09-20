@@ -1,49 +1,69 @@
-import React, { useMemo } from 'react';
-import { useTable, useSortBy } from 'react-table';
+import React, { useMemo, useState } from 'react';
+import {
+  flexRender,
+  getCoreRowModel,
+  useReactTable,
+  getSortedRowModel,
+} from '@tanstack/react-table';
 import MOCK_DATA from './MOCK_DATA.json';
-import { COLUMNS } from './columns';
+import { COLUMNS, GROUPED_COLUMNS } from './columns';
 import './table.css';
 
-const SortingTable = () => {
-  const columns = useMemo(() => COLUMNS, []);
+const BasicTable = () => {
+  const columns = useMemo(() => GROUPED_COLUMNS, []);
   const data = useMemo(() => MOCK_DATA, []);
+  const [sorted, setSorted] = useState([]);
 
-  const tableInstance = useTable({ columns, data }, useSortBy);
+  const tableInstance = useReactTable({
+    columns,
+    data,
+    state: { sorting: sorted },
+    onSortingChange: setSorted,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+  });
 
-  const { getTableProps, getTableBodyProps, headerGroups, footerGroups, rows, prepareRow } =
-    tableInstance;
+  const { getHeaderGroups, getFooterGroups, getRowModel } = tableInstance;
 
   return (
-    <table {...getTableProps()}>
+    <table>
       <thead>
-        {headerGroups.map((headerGroup) => (
-          <tr {...headerGroup.getHeaderGroupProps()}>
-            {headerGroup.headers.map((column) => (
-              <th {...column.getHeaderProps(column.getSortByToggleProps())}>
-                {column.render('Header')}
-                <span>{column.isSorted ? (column.isSortedDesc ? ' 🔽' : ' 🔼') : ' sort'}</span>
+        {getHeaderGroups().map((headerGroup) => (
+          <tr key={headerGroup.id}>
+            {headerGroup.headers.map((columnEl) => (
+              <th key={columnEl.id} onClick={columnEl.column.getToggleSortingHandler()}>
+                {/**
+                 * Add onClick listener with columnEl.column.getToggleSortingHandler()
+                 * Code for rendering the cell value
+                 */}
+                {flexRender(columnEl.column.columnDef.header, columnEl.getContext())}
+                {/**
+                 * Code for rendering the up and down sorting
+                 * columnEl.column.getIsSorted() returns asc or desc if the column is sorted
+                 * and using [] get the right value
+                 */}
+                {{ asc: ' - UP', desc: ' - DOWN' }[columnEl.column.getIsSorted() ?? null]}
               </th>
             ))}
           </tr>
         ))}
       </thead>
-      <tbody {...getTableBodyProps()}>
-        {rows.map((row) => {
-          prepareRow(row);
-          return (
-            <tr {...row.getRowProps()}>
-              {row.cells.map((cell) => {
-                return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
-              })}
-            </tr>
-          );
-        })}
+      <tbody>
+        {getRowModel().rows.map((row) => (
+          <tr key={row.id}>
+            {row.getVisibleCells().map((cell) => (
+              <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+            ))}
+          </tr>
+        ))}
       </tbody>
       <tfoot>
-        {footerGroups.map((footerGroup) => (
-          <tr {...footerGroup.getFooterGroupProps()}>
+        {getFooterGroups().map((footerGroup) => (
+          <tr key={footerGroup.id}>
             {footerGroup.headers.map((column) => (
-              <td {...column.getFooterProps()}>{column.render('Footer')}</td>
+              <td key={column.id}>
+                {flexRender(column.column.columnDef.footer, column.getContext())}
+              </td>
             ))}
           </tr>
         ))}
@@ -52,4 +72,4 @@ const SortingTable = () => {
   );
 };
 
-export default SortingTable;
+export default BasicTable;

@@ -213,8 +213,11 @@ export const GROUPED_COLUMNS = [
         id: 'date_of_birth',
         header: 'Date of Birth',
         footer: 'Date of Birth',
-        accessorFn: (row) => {
-          return format(new Date(row['date_of_birth']), 'dd/MM/yyyy');
+        accessorKey: 'date_of_birth',
+
+        cell: (row) => {
+          // console.log(row.getValue());
+          return format(new Date(row.getValue()), 'dd/MM/yyyy');
         },
       },
       { header: 'Country', footer: 'Country', accessorKey: 'country' },
