@@ -54,6 +54,7 @@ export const COLUMNS = [
     // filterFn: 'fuzzy',
     // sortingFn: fuzzySort,
     enableColumnFilter: false,
+    enableGlobalFilter: false,
   },
   {
     header: 'Date of Birth',

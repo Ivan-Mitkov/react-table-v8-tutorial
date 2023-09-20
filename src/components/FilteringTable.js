@@ -15,6 +15,7 @@ import MOCK_DATA from './MOCK_DATA.json';
 import { COLUMNS } from './columns';
 import DebouncedInput from './DebouncedInput';
 import Filter from './Filter';
+import Checkbox from './Checkbox';
 import './table.css';
 
 const fuzzyFilter = (row, columnId, value, addMeta) => {
@@ -34,15 +35,20 @@ const FilteringTable = () => {
   const columns = useMemo(() => COLUMNS, []);
   const data = useMemo(() => MOCK_DATA, []);
 
+  const defaultColumn = useMemo(() => {
+    return { defaultInput: <input type="checkbox" /> };
+  }, []);
+
   const [columnFilters, setColumnFilters] = React.useState([]);
   const [globalFilter, setGlobalFilter] = React.useState('');
 
   const tableInstance = useReactTable({
     columns,
     data,
-    filterFns: {
-      fuzzy: fuzzyFilter,
-    },
+    defaultColumn: defaultColumn,
+    // filterFns: {
+    //   fuzzy: fuzzyFilter,
+    // },
     state: {
       columnFilters,
       globalFilter,
@@ -80,6 +86,7 @@ const FilteringTable = () => {
                     <>
                       {column.column.getCanFilter() ? (
                         <div>
+                          {column.column.columnDef.defaultInput}
                           <Filter column={column.column} table={tableInstance} />
                         </div>
                       ) : null}
