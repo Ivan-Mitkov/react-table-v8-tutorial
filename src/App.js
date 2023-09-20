@@ -1,9 +1,9 @@
-import FilteringTable from './components/FilteringTable';
+import ColumnOrder from './components/ColumnOrder';
 
 function App() {
   return (
     <div>
-      <FilteringTable />
+      <ColumnOrder />
     </div>
   );
 }

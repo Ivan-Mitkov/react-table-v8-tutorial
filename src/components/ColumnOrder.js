@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { useTable, useColumnOrder } from 'react-table';
+import { flexRender, getCoreRowModel, useReactTable } from '@tanstack/react-table';
 import MOCK_DATA from './MOCK_DATA.json';
 import { COLUMNS } from './columns';
 import './table.css';
@@ -7,58 +7,90 @@ import './table.css';
 const ColumnOrder = () => {
   const columns = useMemo(() => COLUMNS, []);
   const data = useMemo(() => MOCK_DATA, []);
+  const [columnVisibility, setColumnVisibility] = React.useState({});
+  const [columnOrder, setColumnOrder] = React.useState([]);
 
-  const tableInstance = useTable({ columns, data }, useColumnOrder);
+  const tableInstance = useReactTable({
+    columns,
+    data,
+    state: {
+      columnVisibility,
+      columnOrder,
+    },
+    onColumnVisibilityChange: setColumnVisibility,
+    onColumnOrderChange: setColumnOrder,
+    getCoreRowModel: getCoreRowModel(),
+  });
 
-  const {
-    getTableProps,
-    getTableBodyProps,
-    headerGroups,
-    footerGroups,
-    rows,
-    prepareRow,
-    setColumnOrder,
-  } = tableInstance;
+  const { getHeaderGroups, getFooterGroups, getRowModel } = tableInstance;
 
-  const changeOrder = () => {
-    setColumnOrder(['id', 'first_name', 'last_name', 'phone', 'country', 'date_of_birth']);
-  };
   return (
-    <>
-      <button onClick={changeOrder}>Change Column Order</button>
-      <table {...getTableProps()}>
+    <div className="p-2">
+      <div className="inline-block border border-black shadow rounded">
+        <div className="px-1 border-b border-black">
+          <label>
+            <input
+              {...{
+                type: 'checkbox',
+                checked: tableInstance.getIsAllColumnsVisible(),
+                onChange: tableInstance.getToggleAllColumnsVisibilityHandler(),
+              }}
+            />{' '}
+            Toggle All
+          </label>
+        </div>
+        {tableInstance.getAllLeafColumns().map((column) => {
+          console.log(column);
+          return (
+            <div key={column.id} className="px-1">
+              <label>
+                <input
+                  {...{
+                    type: 'checkbox',
+                    checked: column.getIsVisible(),
+                    onChange: column.getToggleVisibilityHandler(),
+                  }}
+                />{' '}
+                {column.columnDef.header}
+              </label>
+            </div>
+          );
+        })}
+      </div>
+      <table>
         <thead>
-          {headerGroups.map((headerGroup) => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
+          {getHeaderGroups().map((headerGroup) => (
+            <tr key={headerGroup.id}>
               {headerGroup.headers.map((column) => (
-                <th {...column.getHeaderProps()}>{column.render('Header')}</th>
+                <th key={column.id}>
+                  {flexRender(column.column.columnDef.header, column.getContext())}
+                </th>
               ))}
             </tr>
           ))}
         </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map((row) => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map((cell) => {
-                  return <td {...cell.getCellProps()}>{cell.render('Cell')}</td>;
-                })}
-              </tr>
-            );
-          })}
+        <tbody>
+          {getRowModel().rows.map((row) => (
+            <tr key={row.id}>
+              {row.getVisibleCells().map((cell) => (
+                <td key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</td>
+              ))}
+            </tr>
+          ))}
         </tbody>
         <tfoot>
-          {footerGroups.map((footerGroup) => (
-            <tr {...footerGroup.getFooterGroupProps()}>
+          {getFooterGroups().map((footerGroup) => (
+            <tr key={footerGroup.id}>
               {footerGroup.headers.map((column) => (
-                <td {...column.getFooterProps()}>{column.render('Footer')}</td>
+                <td key={column.id}>
+                  {flexRender(column.column.columnDef.footer, column.getContext())}
+                </td>
               ))}
             </tr>
           ))}
         </tfoot>
       </table>
-    </>
+    </div>
   );
 };
 
