@@ -1,5 +1,22 @@
 import { format } from 'date-fns';
 // import ColumnFilter from './ColumnFilter';
+import { sortingFns } from '@tanstack/react-table';
+import { compareItems } from '@tanstack/match-sorter-utils';
+
+const fuzzySort = (rowA, rowB, columnId) => {
+  let dir = 0;
+
+  // Only sort by rank if the column has ranking information
+  if (rowA.columnFiltersMeta[columnId]) {
+    dir = compareItems(
+      rowA.columnFiltersMeta[columnId]?.itemRank,
+      rowB.columnFiltersMeta[columnId]?.itemRank,
+    );
+  }
+
+  // Provide an alphanumeric fallback for when the item ranks are equal
+  return dir === 0 ? sortingFns.alphanumeric(rowA, rowB, columnId) : dir;
+};
 
 export const COLUMNS = [
   {
@@ -16,6 +33,8 @@ export const COLUMNS = [
     accessorKey: 'first_name',
     // Filter: ColumnFilter,
     sticky: 'left',
+    filterFn: 'fuzzy',
+    sortingFn: fuzzySort,
   },
   {
     header: 'Last Name',
@@ -23,12 +42,16 @@ export const COLUMNS = [
     accessorKey: 'last_name',
     // Filter: ColumnFilter,
     sticky: 'left',
+    filterFn: 'fuzzy',
+    sortingFn: fuzzySort,
   },
   {
     header: 'Email',
     footer: 'Email',
     accessorKey: 'email',
     // Filter: ColumnFilter,
+    filterFn: 'fuzzy',
+    sortingFn: fuzzySort,
   },
   {
     header: 'Date of Birth',
